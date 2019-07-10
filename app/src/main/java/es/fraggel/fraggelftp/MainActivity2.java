@@ -10,22 +10,37 @@ import android.provider.OpenableColumns;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 
-public class MainActivity2 extends AppCompatActivity {
+public class MainActivity2 extends AppCompatActivity implements View.OnClickListener {
 
     ArrayList<Uri> imageUris;
     String[] dirs2=null;
     String cual="";
+    public String server="fraggel.ddns.net";
+    public int puerto=21;
+    public int puertossh=2222;
+    public String usuario="fraggel";
+    public String pass="ak47cold";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Button btn=(Button)findViewById(R.id.button);
+        btn.setOnClickListener(this);
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -190,5 +205,31 @@ public class MainActivity2 extends AppCompatActivity {
         });
 
         builder.show();
+    }
+
+    @Override
+    public void onClick(View view) {
+        try {
+            JSch jsch = new JSch();
+            Session session=jsch.getSession(usuario, server, puertossh);
+            session.setPassword(pass);
+            Properties config = new Properties();
+            config.put("StrictHostKeyChecking", "no");
+            session.setConfig(config);
+            session.connect();
+
+            Channel channel=session.openChannel("exec");
+            //write the command, which expects password
+            String chmodCommand="export LD_LIBRARY_PATH=/usr/lib/plexmediaserver";
+            ((ChannelExec)channel).setCommand(chmodCommand);
+            channel.connect();
+            channel.disconnect();
+            session.disconnect();
+        } catch (Exception ex) {
+            System.out.println("Oops! Something wrong happened");
+            ex.printStackTrace();
+        } finally {
+
+        }
     }
 }

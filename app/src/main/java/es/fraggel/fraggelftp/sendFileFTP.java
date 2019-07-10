@@ -2,6 +2,7 @@ package es.fraggel.fraggelftp;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
