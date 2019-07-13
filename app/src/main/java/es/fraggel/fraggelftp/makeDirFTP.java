@@ -16,11 +16,7 @@ import java.util.Properties;
 
 public class makeDirFTP extends AsyncTask<String,Void,String[]>
 {
-    public String server="fraggel.ddns.net";
-    public int puerto=21;
-    public int puertossh=2222;
-    public String usuario="fraggel";
-    public String pass="ak47cold";
+
     @Override
     protected void onPreExecute() {
         // Show progress dialog
@@ -39,14 +35,14 @@ public class makeDirFTP extends AsyncTask<String,Void,String[]>
         String[] files2=null;
         try {
 
-            ftpClient.connect(server, puerto);
+            ftpClient.connect(Propiedades.server, Propiedades.puerto);
 
             int replyCode = ftpClient.getReplyCode();
-            boolean success = ftpClient.login(usuario, pass);
-            ftpClient.makeDirectory("/disks/750GB/Fotos/Sandra/"+params[0]);
+            boolean success = ftpClient.login(Propiedades.usuario, Propiedades.pass);
+            ftpClient.makeDirectory(Propiedades.urlServletDirs+params[0]);
             JSch jsch = new JSch();
-            Session session=jsch.getSession(usuario, server, puertossh);
-            session.setPassword(pass);
+            Session session=jsch.getSession(Propiedades.usuario, Propiedades.server, Propiedades.puertossh);
+            session.setPassword(Propiedades.pass);
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
@@ -54,7 +50,7 @@ public class makeDirFTP extends AsyncTask<String,Void,String[]>
 
             Channel channel=session.openChannel("exec");
             //write the command, which expects password
-            String chmodCommand="chmod -R 777 /disks/750GB/Fotos/Sandra/"+params[0];
+            String chmodCommand="chmod -R 777 "+Propiedades.urlServletDirs+params[0];
             ((ChannelExec)channel).setCommand(chmodCommand);
             channel.connect();
             channel.disconnect();

@@ -9,10 +9,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Archivos copiados correctamente"
+        android:text="Elementos enviados, revisa la notificación para comprobar si ya ha terminado el proceso"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <Button android:layout_width="fill_parent"
+        android:layout_height="wrap_content" android:id="@+id/btn1"
+        android:text="Cerrar App" />
 
 </android.support.constraint.ConstraintLayout>

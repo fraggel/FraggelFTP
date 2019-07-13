@@ -7,16 +7,17 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.jibble.simpleftp.SimpleFTP;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 public class getDirsFTP extends AsyncTask<String,Void,String[]>
 {
-    public String server="fraggel.ddns.net";
-    public int puerto=21;
-    public String usuario="fraggel";
-    public String pass="ak47cold";
     @Override
     protected void onPreExecute() {
         // Show progress dialog
@@ -31,35 +32,21 @@ public class getDirsFTP extends AsyncTask<String,Void,String[]>
 
     @Override
     protected String[] doInBackground(String... params) {
-        FTPClient ftpClient = new FTPClient();
         String[] files2=null;
         try {
-
-            ftpClient.connect(server, puerto);
-
-            int replyCode = ftpClient.getReplyCode();
-            boolean success = ftpClient.login(usuario, pass);
-
-            // Lists files and directories
-            //FTPFile[] files1 = ftpClient.listDirectories("/disks/750GB/Fotos/Sandra/");
-
-            // uses simpler methods
-            files2 = ftpClient.listNames("/disks/750GB/Fotos/Sandra/");
-
-
-        } catch (IOException ex) {
+            URL openUrl = new URL(Propiedades.urlServletDirs);
+            HttpURLConnection connection = (HttpURLConnection) openUrl.openConnection();
+            connection.setDoInput(true);
+            //  Toast.makeText(getApplicationContext(),"hello",Toast.LENGTH_LONG).show();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line = "";
+            StringBuilder getOutput = new StringBuilder();
+            line = br.readLine();
+            br.close();
+            files2=line.split(",");
+        } catch (Exception ex) {
             System.out.println("Oops! Something wrong happened");
             ex.printStackTrace();
-        } finally {
-            // logs out and disconnects from server
-            try {
-                if (ftpClient.isConnected()) {
-                    ftpClient.logout();
-                    ftpClient.disconnect();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
         }
         return files2;
     }

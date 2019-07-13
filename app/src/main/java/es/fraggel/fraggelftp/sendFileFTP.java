@@ -47,7 +47,7 @@ public class sendFileFTP extends AsyncTask<String,Void,String>
             ftp.bin();
 
             // Change to a new working directory on the FTP server.
-            ftp.cwd("/disks/750GB/Fotos/Sandra/"+params[1]);
+            ftp.cwd(Propiedades.rutaFotos+params[1]);
 
             // Upload some files.
             ftp.stor(new File(params[0]));
@@ -68,7 +68,7 @@ public class sendFileFTP extends AsyncTask<String,Void,String>
 
             Channel channel=session.openChannel("exec");
             //write the command, which expects password
-            String chmodCommand="chmod -R 777 /disks/750GB/Fotos/Sandra/"+params[1];
+            String chmodCommand="chmod -R 777 "+Propiedades.urlServletDirs+params[1];
             ((ChannelExec)channel).setCommand(chmodCommand);
             channel.connect();
             channel.disconnect();
