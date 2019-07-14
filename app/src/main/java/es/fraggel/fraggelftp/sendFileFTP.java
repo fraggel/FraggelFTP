@@ -2,6 +2,7 @@ package es.fraggel.fraggelftp;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
@@ -55,7 +56,6 @@ public class sendFileFTP extends AsyncTask<String,Void,String>
 
             // You can also upload from an InputStream, e.g.
             //ftp.stor(new FileInputStream(new File("test.png")), "test.png");
-
             // Quit from the FTP server.
             ftp.disconnect();
             JSch jsch = new JSch();
