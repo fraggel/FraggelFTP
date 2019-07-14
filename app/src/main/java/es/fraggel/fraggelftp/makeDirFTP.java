@@ -1,6 +1,7 @@
 package es.fraggel.fraggelftp;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
@@ -11,7 +12,12 @@ import com.jcraft.jsch.UserInfo;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Properties;
 
 public class makeDirFTP extends AsyncTask<String,Void,String[]>
@@ -30,46 +36,26 @@ public class makeDirFTP extends AsyncTask<String,Void,String[]>
     }
 
     @Override
-    protected String[] doInBackground(String... params) {
-        FTPClient ftpClient = new FTPClient();
-        String[] files2=null;
+    protected boolean doInBackground(String... params) {
+        boolean copiado=false;
+
         try {
-
-            ftpClient.connect(Propiedades.server, Propiedades.puerto);
-
-            int replyCode = ftpClient.getReplyCode();
-            boolean success = ftpClient.login(Propiedades.usuario, Propiedades.pass);
-            ftpClient.makeDirectory(Propiedades.urlServletDirs+params[0]);
-            JSch jsch = new JSch();
-            Session session=jsch.getSession(Propiedades.usuario, Propiedades.server, Propiedades.puertossh);
-            session.setPassword(Propiedades.pass);
-            Properties config = new Properties();
-            config.put("StrictHostKeyChecking", "no");
-            session.setConfig(config);
-            session.connect();
-
-            Channel channel=session.openChannel("exec");
-            //write the command, which expects password
-            String chmodCommand="chmod -R 777 "+Propiedades.urlServletDirs+params[0];
-            ((ChannelExec)channel).setCommand(chmodCommand);
-            channel.connect();
-            channel.disconnect();
-            session.disconnect();
+            URL openUrl = new URL(Propiedades.urlServletMkdir);
+            HttpURLConnection connection = (HttpURLConnection) openUrl.openConnection();
+            connection.setDoInput(true);
+            //  Toast.makeText(getApplicationContext(),"hello",Toast.LENGTH_LONG).show();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line = "";
+            StringBuilder getOutput = new StringBuilder();
+            line = br.readLine();
+            Boolean bl=new Boolean(line);
+            copiado=bl.booleanValue();
+            br.close();
         } catch (Exception ex) {
             System.out.println("Oops! Something wrong happened");
             ex.printStackTrace();
-        } finally {
-            // logs out and disconnects from server
-            try {
-                if (ftpClient.isConnected()) {
-                    ftpClient.logout();
-                    ftpClient.disconnect();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
         }
-        return files2;
+        return copiado;
     }
 
 

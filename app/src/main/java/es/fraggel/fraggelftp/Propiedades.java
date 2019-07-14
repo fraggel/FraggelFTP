@@ -9,4 +9,5 @@ public class Propiedades {
     public static String urlServletDirs="http://fraggel.ddns.net:8081/GestorPic/GetListDir";
     public static String urlServletUpload="http://fraggel.ddns.net:8081/GestorPic/UploadFile";
     public static String rutaFotos="/disks/750GB/Fotos/Sandra/";
+    public static String urlServletMkdir="http://fraggel.ddns.net:8081/GestorPic/Mkdir";
 }
