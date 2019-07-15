@@ -15,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class getDirsFTP extends AsyncTask<String,Void,String[]>
 {
@@ -44,6 +46,7 @@ public class getDirsFTP extends AsyncTask<String,Void,String[]>
             line = br.readLine();
             br.close();
             files2=line.split(",");
+            Collections.sort(Arrays.asList(files2),String.CASE_INSENSITIVE_ORDER);
         } catch (Exception ex) {
             System.out.println("Oops! Something wrong happened");
             ex.printStackTrace();

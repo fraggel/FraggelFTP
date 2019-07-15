@@ -14,8 +14,5 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <Button android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:id="@+id/btn1"
-        android:text="Cerrar App" />
 
 </android.support.constraint.ConstraintLayout>

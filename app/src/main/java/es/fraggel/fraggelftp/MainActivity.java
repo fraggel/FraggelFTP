@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button btn1 = (Button) findViewById(R.id.btn1);
+        /*Button btn1 = (Button) findViewById(R.id.btn1);
         btn1.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                 finish();
                 System.exit(0);
             }
-        });
+        });*/
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -192,7 +192,8 @@ public class MainActivity extends AppCompatActivity {
                         fos.close();
                         new makeDirFTP().execute(cual);
                         SystemClock.sleep(1000);
-                        new sendFileFTP().execute(getFilesDir()+"/"+filename,cual);
+                        new uploadFile(getApplicationContext(),"Subiendo elementos:",25,imageUris.size(),x+1).execute(getFilesDir()+"/"+filename,cual);
+
 
                     } catch (Exception e) {
                         e.printStackTrace();

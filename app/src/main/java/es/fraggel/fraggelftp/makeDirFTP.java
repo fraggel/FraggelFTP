@@ -20,7 +20,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
-public class makeDirFTP extends AsyncTask<String,Void,String[]>
+public class makeDirFTP extends AsyncTask<String,Void,Boolean>
 {
 
     @Override
@@ -30,17 +30,17 @@ public class makeDirFTP extends AsyncTask<String,Void,String[]>
     }
 
     @Override
-    protected void onPostExecute(String[] lista) {
+    protected void onPostExecute(Boolean lista) {
         //Populate Ui
         super.onPostExecute(lista);
     }
 
     @Override
-    protected boolean doInBackground(String... params) {
+    protected Boolean doInBackground(String... params) {
         boolean copiado=false;
 
         try {
-            URL openUrl = new URL(Propiedades.urlServletMkdir);
+            URL openUrl = new URL(Propiedades.urlServletMkdir+"?ruta="+params[0]);
             HttpURLConnection connection = (HttpURLConnection) openUrl.openConnection();
             connection.setDoInput(true);
             //  Toast.makeText(getApplicationContext(),"hello",Toast.LENGTH_LONG).show();
@@ -55,7 +55,7 @@ public class makeDirFTP extends AsyncTask<String,Void,String[]>
             System.out.println("Oops! Something wrong happened");
             ex.printStackTrace();
         }
-        return copiado;
+        return new Boolean(copiado);
     }
 
 
