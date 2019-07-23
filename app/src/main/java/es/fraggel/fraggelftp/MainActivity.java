@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<Uri> imageUris;
     String[] dirs2=null;
-    String cual="";
+    String directorio="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 if(which==0){
                     showAlertText();
                 }else{
-                    cual=dirs2[which];
+                    directorio=dirs2[which];
                     for(int x=0;x<imageUris.size();x++){
                         try {
                             InputStream inputStream = getContentResolver().openInputStream(imageUris.get(x));
@@ -138,7 +138,10 @@ public class MainActivity extends AppCompatActivity {
                                 fos.flush();
                             }
                             fos.close();
-                            new uploadFile(getApplicationContext(),"Subiendo elementos:",25,imageUris.size(),x+1).execute(getFilesDir()+"/"+filename,cual);
+                            boolean existe=new checkExists().execute(filename,directorio).get();
+                            if(!existe) {
+                                new uploadFile(getApplicationContext(), "Subiendo elementos:", 25, imageUris.size(), x + 1).execute(getFilesDir() + "/" + filename, directorio);
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -169,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                cual = input.getText().toString();
+                directorio = input.getText().toString();
                 for(int x=0;x<imageUris.size();x++){
                     try {
                         InputStream inputStream = getContentResolver().openInputStream(imageUris.get(x));
@@ -190,9 +193,9 @@ public class MainActivity extends AppCompatActivity {
                             fos.flush();
                         }
                         fos.close();
-                        new makeDirFTP().execute(cual);
+                        new makeDirFTP().execute(directorio);
                         SystemClock.sleep(1000);
-                        new uploadFile(getApplicationContext(),"Subiendo elementos:",25,imageUris.size(),x+1).execute(getFilesDir()+"/"+filename,cual);
+                        new uploadFile(getApplicationContext(),"Subiendo elementos:",25,imageUris.size(),x+1).execute(getFilesDir()+"/"+filename,directorio);
 
 
                     } catch (Exception e) {

@@ -148,9 +148,11 @@ public class uploadFile extends AsyncTask<String, Double, Void> {
                 mNotificationManager.createNotificationChannel(notificationChannel);
             }
             assert mNotificationManager != null;
+        mNotificationManager.cancelAll();
             Notification noti=mBuilder.build();
             noti.flags=FLAG_ONLY_ALERT_ONCE;
         mNotificationManager.notify(0 /* Request Code */, noti);
+
 
     }
 }
