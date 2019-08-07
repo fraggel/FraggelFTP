@@ -7,9 +7,12 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -19,15 +22,17 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 
-public class uploadFile extends AsyncTask<String, Double, Void> {
+public class uploadFile extends AsyncTask<ArrayList, Double, Void> {
     private final static String TAG = uploadFile.class.getName();
     private Context mContext;
     private NotificationManager mNotificationManager;
@@ -35,47 +40,75 @@ public class uploadFile extends AsyncTask<String, Double, Void> {
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
     private final int mId;
     private final String mTitle;
-    private final int mNumElementos;
-    private final int mElementoActual;
+    private int mNumElementos;
+    private int mElementoActual;
 
-    public uploadFile(Context context, String title, int id,int numElementos,int elementoActual) {
+    public uploadFile(Context context, String title, int id) {
         mContext = context;
         mTitle = title;
         mId = id;
-        mNumElementos=numElementos;
-        mElementoActual=elementoActual;
     }
     @Override
-    protected Void doInBackground(String... strings) {
-        String archivo=strings[0];
-        String directorio=strings[1];
+    protected Void doInBackground(ArrayList... strings) {
+        String directorio=(String)strings[0].get(0);
+        ArrayList imageUris=strings[0];
+        mNumElementos=imageUris.size()-1;
         String charset = "UTF-8";
         String requestURL = Propiedades.urlServletUpload;
+        for(int x=1;x<imageUris.size();x++){
+            mElementoActual=x;
+            try {
+                InputStream inputStream = mContext.getContentResolver().openInputStream((Uri)imageUris.get(x));
+                String filename="";
+                Cursor cursor = mContext.getContentResolver().query((Uri)imageUris.get(x), null, null, null, null);
+                try {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        filename = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    }
+                } finally {
+                    cursor.close();
+                }
+                FileOutputStream fos=new FileOutputStream(mContext.getFilesDir()+"/"+filename);
+                byte[] b=new byte[1024];
 
-        MultipartUtility multipart = null;
-        try {
-            multipart = new MultipartUtility(requestURL, charset);
-        } catch (IOException e) {
-            e.printStackTrace();
+                while(inputStream.read(b)!=-1){
+                    fos.write(b);
+                    fos.flush();
+                }
+                fos.close();
+
+                    MultipartUtility multipart = null;
+                    try {
+                        multipart = new MultipartUtility(requestURL, charset);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    File ff=new File(mContext.getFilesDir()+"/"+filename);
+                    multipart.addFormField("nombre", ff.getName());
+                    multipart.addFormField("ruta", directorio);
+                    try {
+                        multipart.addFilePart("fichero",ff );
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        String response = multipart.finish(); // response from server.
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    ff.delete();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            publishProgress(new Double(mElementoActual*100)/mNumElementos);
         }
-        File ff=new File(archivo);
-        multipart.addFormField("nombre", ff.getName());
-        multipart.addFormField("ruta", directorio);
-        try {
-            multipart.addFilePart("fichero",ff );
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            String response = multipart.finish(); // response from server.
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        publishProgress(new Double(mElementoActual*100)/mNumElementos);
+
+
         return null;
     }
     private void initNotification() {
-        createNotification(mTitle,"Enviando archivo "+mElementoActual+" de "+mNumElementos);
+        createNotification(mTitle,"Enviando archivos");
     }
 
     @Override
@@ -93,7 +126,7 @@ public class uploadFile extends AsyncTask<String, Double, Void> {
         Log.d(TAG, "onPreExecute");
         super.onPreExecute();
 
-        initNotification();
+            initNotification();
 
     }
 
@@ -105,12 +138,13 @@ public class uploadFile extends AsyncTask<String, Double, Void> {
         int incr = values[0].intValue();
         //if (incr == 0)
             //setProgressNotification();
-        //updateProgressNotification(incr);
+        updateProgressNotification(incr);
 
     }
 
     private void updateProgressNotification(int incr) {
         mBuilder.setProgress(100,incr,false);
+        mBuilder.setContentText("Enviando archivo "+mElementoActual+" de "+ mNumElementos);
         Notification noti=mBuilder.build();
         noti.flags=FLAG_ONLY_ALERT_ONCE;
         mNotificationManager.notify(0, noti);

@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -118,11 +119,13 @@ public class MainActivity extends AppCompatActivity {
                     showAlertText();
                 }else{
                     directorio=dirs2[which];
-                    for(int x=0;x<imageUris.size();x++){
+                    ArrayList lista=new ArrayList();
+                    lista.add(directorio);
+                    for (int y = 0; y < imageUris.size(); y++) {
                         try {
-                            InputStream inputStream = getContentResolver().openInputStream(imageUris.get(x));
-                            String filename="";
-                            Cursor cursor = getContentResolver().query(imageUris.get(x), null, null, null, null);
+                            InputStream inputStream = getContentResolver().openInputStream((Uri) imageUris.get(y));
+                            String filename = "";
+                            Cursor cursor = getContentResolver().query((Uri) imageUris.get(y), null, null, null, null);
                             try {
                                 if (cursor != null && cursor.moveToFirst()) {
                                     filename = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
@@ -130,22 +133,13 @@ public class MainActivity extends AppCompatActivity {
                             } finally {
                                 cursor.close();
                             }
-                            FileOutputStream fos=new FileOutputStream(getFilesDir()+"/"+filename);
-                            byte[] b=new byte[1024];
-
-                            while(inputStream.read(b)!=-1){
-                                fos.write(b);
-                                fos.flush();
+                            boolean existe = new checkExists().execute(filename, directorio).get();
+                            if (!existe) {
+                                lista.add(imageUris.get(y));
                             }
-                            fos.close();
-                            boolean existe=new checkExists().execute(filename,directorio).get();
-                            if(!existe) {
-                                new uploadFile(getApplicationContext(), "Subiendo elementos:", 25, imageUris.size(), x + 1).execute(getFilesDir() + "/" + filename, directorio);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        }catch (Exception e){}
                     }
+                    new uploadFile(getApplicationContext(), directorio+":", 25).execute(lista);
                 }
 
 
@@ -173,34 +167,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 directorio = input.getText().toString();
-                for(int x=0;x<imageUris.size();x++){
-                    try {
-                        InputStream inputStream = getContentResolver().openInputStream(imageUris.get(x));
-                        String filename="";
-                        Cursor cursor = getContentResolver().query(imageUris.get(x), null, null, null, null);
+                ArrayList lista = new ArrayList();
+                lista.add(directorio);
+                boolean createdDir = false;
+                try {
+                    createdDir = new makeDirFTP().execute(directorio).get();
+                } catch (Exception e) {
+                }
+                if (createdDir) {
+                    for (int y = 0; y < imageUris.size(); y++) {
                         try {
-                            if (cursor != null && cursor.moveToFirst()) {
-                                filename = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                            InputStream inputStream = getContentResolver().openInputStream((Uri) imageUris.get(y));
+                            String filename = "";
+                            Cursor cursor = getContentResolver().query((Uri) imageUris.get(y), null, null, null, null);
+                            try {
+                                if (cursor != null && cursor.moveToFirst()) {
+                                    filename = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                                }
+                            } finally {
+                                cursor.close();
                             }
-                        } finally {
-                            cursor.close();
+                            boolean existe = new checkExists().execute(filename, directorio).get();
+                            if (!existe) {
+                                lista.add(imageUris.get(y));
+                            }
+                        } catch (Exception e) {
                         }
-                        FileOutputStream fos=new FileOutputStream(getFilesDir()+"/"+filename);
-                        byte[] b=new byte[1024];
-
-                        while(inputStream.read(b)!=-1){
-                            fos.write(b);
-                            fos.flush();
-                        }
-                        fos.close();
-                        new makeDirFTP().execute(directorio);
-                        SystemClock.sleep(1000);
-                        new uploadFile(getApplicationContext(),"Subiendo elementos:",25,imageUris.size(),x+1).execute(getFilesDir()+"/"+filename,directorio);
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
+
+                    new uploadFile(getApplicationContext(), directorio+":", 25).execute(lista);
                 }
             }
         });

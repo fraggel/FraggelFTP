@@ -40,7 +40,7 @@ public class checkExists extends AsyncTask<String,Void,Boolean>
         boolean copiado=false;
 
         try {
-            URL openUrl = new URL(Propiedades.urlServletMkdir+"?nombre="+params[0]+"ruta="+params[1]);
+            URL openUrl = new URL(Propiedades.urlServletCheckFile+"?nombre="+params[0]+"&ruta="+params[1]);
             HttpURLConnection connection = (HttpURLConnection) openUrl.openConnection();
             connection.setDoInput(true);
             //  Toast.makeText(getApplicationContext(),"hello",Toast.LENGTH_LONG).show();
